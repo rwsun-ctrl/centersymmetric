@@ -1,0 +1,80 @@
+<body>
+  <input id="parts" type="number" value="6" min="1">
+  <input id="color" type="color" value="#000000">
+  <button id="clear">Clear</button>
+  <canvas id="canvas"></canvas>
+</body>
+
+<style>
+  body { margin: 0; overflow: hidden; }
+  input, button {
+    position: fixed;
+    top: 10px;
+    z-index: 10;
+  }
+  #parts { left: 10px; }
+  #color { left: 80px; }
+  #clear { left: 150px; }
+  canvas { display: block; }
+</style>
+
+<script>
+  const canvas = document.querySelector('#canvas')
+  const ctx = canvas.getContext('2d')
+  const input = document.querySelector('#parts')
+  const colorInput = document.querySelector('#color')
+
+  canvas.width = window.innerWidth
+  canvas.height = window.innerHeight
+
+  let oldX = 0
+  let oldY = 0
+  let drawing = false
+
+  function drawSymmetricLine(x1, y1, x2, y2) {
+    let parts = Number(input.value)
+    let cx = canvas.width / 2
+    let cy = canvas.height / 2
+
+    ctx.strokeStyle = colorInput.value  // current color
+
+    for (let i = 0; i < parts; i++) {
+      let angle = i * Math.PI * 2 / parts
+
+      ctx.save()
+      ctx.translate(cx, cy)
+      ctx.rotate(angle)
+      ctx.translate(-cx, -cy)
+
+      ctx.beginPath()
+      ctx.moveTo(x1, y1)
+      ctx.lineTo(x2, y2)
+      ctx.stroke()
+
+      ctx.restore()
+    }
+  }
+
+  canvas.addEventListener('mousedown', (e) => {
+    drawing = true
+    oldX = e.clientX
+    oldY = e.clientY
+  })
+
+  canvas.addEventListener('mousemove', (e) => {
+    if (!drawing) return
+
+    drawSymmetricLine(oldX, oldY, e.clientX, e.clientY)
+
+    oldX = e.clientX
+    oldY = e.clientY
+  })
+
+  canvas.addEventListener('mouseup', () => {
+    drawing = false
+  })
+
+  document.querySelector('#clear').onclick = () => {
+    ctx.clearRect(0, 0, canvas.width, canvas.height)
+  }
+</script>
